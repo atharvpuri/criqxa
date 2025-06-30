@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Criqxa — Main</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      font-family: 'Outfit', sans-serif;
+      background: #0b0b0b;
+      color: #fff;
+      scroll-behavior: smooth;
+      height: 100%;
+      overflow-x: hidden;
+    }
+    :root {
+      --dark: #0b0b0b;
+      --glass: rgba(255, 255, 255, 0.03);
+      --blur: 20px;
+      --radius: 18px;
+      --white: #ffffff;
+      --accent: #d1d1d1;
+      --shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+    body, button, input, textarea {
+      transition: all 0.3s ease;
+    }
+    body {
+      display: grid;
+      grid-template-columns: 1fr 2.5fr 1.5fr;
+      gap: 1.5rem;
+      padding-bottom: 5rem;
+    }
+    .left-trending, .feed, .right-user { padding: 1.5rem; }
+    .trending-box, .user-box, .post-box, .timeline .post {
+      background: var(--glass);
+      border-radius: var(--radius);
+      backdrop-filter: blur(var(--blur));
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+    .tabs {
+      display: flex; gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .tabs .tab {
+      background: none; border: none; font-size: 1rem; color: #aaa;
+      cursor: pointer; padding: 0.5rem 1rem;
+      border-radius: var(--radius); backdrop-filter: blur(var(--blur));
+    }
+    .tabs .tab.active { background: #1b1b1b; color: var(--white); box-shadow: var(--shadow); }
+    .post-box textarea {
+      width: 100%; background: transparent; border: none;
+      resize: none; height: 3.5rem; font-size: 1rem; color: white;
+      font-family: 'Outfit', sans-serif; outline: none;
+    }
+    .send-btn {
+      margin-top: 0.8rem; background: #2a2a2a; padding: 0.6rem 1.4rem;
+      border-radius: var(--radius); border: none;
+      color: white; cursor: pointer; font-weight: bold;
+    }
+    .send-btn:hover { background: #3a3a3a; }
+    .post-user { font-weight: 600; color: var(--white); margin-bottom: 0.3rem; }
+    .post-content { font-size: 1rem; color: #c1c1c1; margin-bottom: 0.5rem; }
+    .post-meta {
+      font-size: 0.85rem; color: #999;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .like-btn {
+      background: none; border: none;
+      color: #ff5e5e; cursor: pointer; font-size: 1rem; font-weight: bold;
+    }
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: #111; display: flex; justify-content: space-around;
+      padding: 0.8rem 0; box-shadow: 0 -3px 10px rgba(0,0,0,0.3);
+      z-index: 9999; backdrop-filter: blur(var(--blur));
+    }
+    .bottom-bar .nav-item {
+      color: white; font-weight: 600;
+      font-size: 0.9rem; text-decoration: none; transition: color 0.3s;
+    }
+    .bottom-bar .nav-item:hover { color: var(--accent); }
+    @media (max-width: 1024px) {
+      body { grid-template-columns: 1fr; }
+      .left-trending, .right-user { display: none; }
+      .feed { padding: 1rem; }
+    }
+    @media (max-width: 600px) {
+      .tabs { flex-direction: column; }
+      .tabs .tab { width: 100%; text-align: center; }
+      .bottom-bar .nav-item { font-size: 0.8rem; }
+      .post-box textarea { height: 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Trending -->
+  <aside class="left-trending">
+    <div class="trending-box">
+      <h3>🔥 Trending Now</h3>
+      <ul>
+        <li>#Virat100</li>
+        <li>IND vs AUS</li>
+        <li>#MSDhoni</li>
+        <li>#T20WorldCup</li>
+        <li>Funny Toss GIF</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Feed -->
+  <main class="feed">
+    <div class="tabs">
+      <button class="tab active">For You</button>
+      <button class="tab">Following</button>
+      <button class="tab">Latest</button>
+    </div>
+    <div class="post-box">
+      <textarea id="postContent" placeholder="Your cricket thoughts..."></textarea>
+      <button class="send-btn" id="submitPost">Post</button>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </main>
+
+  <!-- Right Stats -->
+  <aside class="right-user">
+    <div class="user-box">
+      <h3>👤 Your Activity</h3>
+      <ul id="activity-list">
+        <li>0 Posts</li>
+        <li>0 Comments</li>
+        <li>0 Likes</li>
+        <li>0 Space Hosted</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Bottom Nav (Home removed) -->
+  <nav class="bottom-bar">
+    <a href="./explore.html" class="nav-item">🔍 Explore</a>
+    <a href="./profile.html" class="nav-item">👤 Profile</a>
+  </nav>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabase = createClient(
+    'https://thxiqhhpabenkqqnktrb.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoeGlxaGhwYWJlbmtxcW5rdHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNjY2NDAsImV4cCI6MjA2Njg0MjY0MH0.Z_GHmgzGBuRX4YWj2uRT4rR8WtpUA9lg-qZHwn2xNMw'
+  );
+
+  const postBtn = document.getElementById('submitPost');
+  const postBox = document.getElementById('postContent');
+  const timeline = document.getElementById('timeline');
+  const activityList = document.getElementById('activity-list');
+
+  async function init() {
+    const session = await supabase.auth.getSession();
+    const user = session.data.session?.user;
+
+    if (!user) {
+      window.location.href = '../login/login.html';
+      return;
+    }
+
+    postBtn.addEventListener("click", async () => {
+      const content = postBox.value.trim();
+      if (!content) return alert("Write something, bro.");
+
+      const { error } = await supabase.from("posts").insert([
+        {
+          content,
+          user_id: user.id,
+          username: user.email.split("@")[0],
+        },
+      ]);
+
+      if (error) {
+        console.error(error);
+        alert("Failed to post!");
+      } else {
+        postBox.value = "";
+        loadPosts();
+        updateActivity();
+      }
+    });
+
+    loadPosts();
+    updateActivity();
+  }
+
+  async function loadPosts() {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Load error:", error);
+      return;
+    }
+
+    timeline.innerHTML = "";
+    data.forEach(post => {
+      const el = document.createElement("div");
+      el.className = "post";
+      el.innerHTML = `
+        <div class="post-user">@${post.username}</div>
+        <div class="post-content">${post.content}</div>
+        <div class="post-meta">${new Date(post.created_at).toLocaleString()}</div>
+      `;
+      timeline.appendChild(el);
+    });
+  }
+
+  async function updateActivity() {
+    const session = await supabase.auth.getSession();
+    const user = session.data.session?.user;
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Activity error:", error);
+      return;
+    }
+
+    activityList.innerHTML = `
+      <li>${data.length} Posts</li>
+      <li>0 Comments</li>
+      <li>0 Likes</li>
+      <li>0 Space Hosted</li>
+    `;
+  }
+
+  init();
+</script>
+
+</body>
+</html>

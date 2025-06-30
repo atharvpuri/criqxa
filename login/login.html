@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Criqxa — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      font-family: 'Outfit', sans-serif;
+      background: #0b0b0b;
+      color: #fff;
+      scroll-behavior: smooth;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    main {
+      max-width: 420px;
+      margin: 5rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 18px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem;
+      margin-bottom: 1rem;
+      background: #111;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      margin-top: 0.5rem;
+      background: #2a2a2a;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #3a3a3a;
+    }
+
+    @media (max-width: 480px) {
+      main {
+        margin: 2rem 1rem;
+        padding: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>🔥 Welcome to Criqxa</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+
+    <button id="loginBtn">Login</button>
+    <button id="signupBtn">Sign Up</button>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabaseUrl = 'https://thxiqhhpabenkqqnktrb.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoeGlxaGhwYWJlbmtxcW5rdHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNjY2NDAsImV4cCI6MjA2Njg0MjY0MH0.Z_GHmgzGBuRX4YWj2uRT4rR8WtpUA9lg-qZHwn2xNMw';
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert("Login failed: " + error.message);
+      } else {
+        window.location.href = "../homepage/index.html";
+      }
+    });
+
+    document.getElementById("signupBtn").addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      const { data, error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        alert("Signup failed: " + error.message);
+      } else {
+        alert("Signup successful!");
+        window.location.href = "../homepage/index.html";
+      }
+    });
+  </script>
+</body>
+</html>

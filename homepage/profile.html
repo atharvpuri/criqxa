@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Criqxa | Your Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dark: #0b0b0b;
+      --glass: rgba(255,255,255,0.03);
+      --blur: 25px;
+      --radius: 18px;
+      --accent: #dadada;
+      --white: #fff;
+      --shadow: 0 0 20px rgba(255,255,255,0.05);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 30% 40%, #121212, #000000);
+      color: var(--white);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    .container {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .profile-box {
+      background: var(--glass);
+      backdrop-filter: blur(var(--blur));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .profile-info {
+      font-size: 1rem;
+      margin-bottom: 0.6rem;
+      color: var(--accent);
+    }
+    .posts-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .post {
+      background: var(--glass);
+      backdrop-filter: blur(var(--blur));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .post-user { font-weight: bold; margin-bottom: 0.3rem; }
+    .post-content { color: #c1c1c1; }
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #111;
+      display: flex;
+      justify-content: space-around;
+      padding: 1rem 0;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.3);
+      z-index: 9999;
+      backdrop-filter: blur(var(--blur));
+    }
+    .bottom-bar a {
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .bottom-bar a:hover {
+      color: var(--accent);
+    }
+    @media (max-width: 600px) {
+      .container { padding: 1rem; }
+      .bottom-bar a { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>My Profile</h1>
+
+    <div class="profile-box">
+      <div class="profile-info">👤 <strong>Username:</strong> <span id="usernameDisplay">Loading...</span></div>
+      <div class="profile-info">📧 <strong>Email:</strong> <span id="emailDisplay">Loading...</span></div>
+      <div class="profile-info">📅 <strong>Joined:</strong> <span id="joinedDisplay">Loading...</span></div>
+    </div>
+
+    <div class="posts-title">Your Recent Posts</div>
+    <div id="postsContainer">Loading posts...</div>
+  </div>
+
+  <div class="bottom-bar">
+    <a href="explore.html">🔍 Explore</a>
+    <a href="profile.html">👤 Profile</a>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://thxiqhhpabenkqqnktrb.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoeGlxaGhwYWJlbmtxcW5rdHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNjY2NDAsImV4cCI6MjA2Njg0MjY0MH0.Z_GHmgzGBuRX4YWj2uRT4rR8WtpUA9lg-qZHwn2xNMw'
+    );
+
+    async function loadProfile() {
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        window.location.href = '../login/login.html';
+        return;
+      }
+
+      const username = user.email.split('@')[0];
+      document.getElementById('usernameDisplay').textContent = username;
+      document.getElementById('emailDisplay').textContent = user.email;
+      document.getElementById('joinedDisplay').textContent = new Date(user.created_at || Date.now()).toDateString();
+
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      const postsContainer = document.getElementById('postsContainer');
+      if (error || !posts || posts.length === 0) {
+        postsContainer.innerHTML = "<p>No posts yet.</p>";
+      } else {
+        postsContainer.innerHTML = "";
+        posts.forEach(post => {
+          const div = document.createElement("div");
+          div.className = "post";
+          div.innerHTML = `
+            <div class="post-user">@${post.username}</div>
+            <div class="post-content">${post.content}</div>
+          `;
+          postsContainer.appendChild(div);
+        });
+      }
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

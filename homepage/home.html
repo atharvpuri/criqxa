@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Criqxa — Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Put your existing CSS here from index.html's <style> */
+    /* Or just copy paste the full CSS for consistency */
+  </style>
+</head>
+<body>
+  <!-- Your home page structure, copy from index.html or minimal -->
+
+  <!-- Trending -->
+  <aside class="left-trending">
+    <div class="trending-box">
+      <h3>🔥 Trending Now</h3>
+      <ul>
+        <li>#Virat100</li>
+        <li>IND vs AUS</li>
+        <li>#MSDhoni</li>
+        <li>#T20WorldCup</li>
+        <li>Funny Toss GIF</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Feed -->
+  <main class="feed">
+    <div class="tabs">
+      <button class="tab active">For You</button>
+      <button class="tab">Following</button>
+      <button class="tab">Latest</button>
+    </div>
+    <div class="post-box">
+      <textarea id="postContent" placeholder="Your cricket thoughts..."></textarea>
+      <button class="send-btn" id="submitPost">Post</button>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </main>
+
+  <!-- Right Stats -->
+  <aside class="right-user">
+    <div class="user-box">
+      <h3>👤 Your Activity</h3>
+      <ul id="activity-list">
+        <li>0 Posts</li>
+        <li>0 Comments</li>
+        <li>0 Likes</li>
+        <li>0 Space Hosted</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-bar">
+    <a href="./home.html" class="nav-item">🏠 Home</a>
+    <a href="./explore.html" class="nav-item">🔍 Explore</a>
+    <a href="./profile.html" class="nav-item">👤 Profile</a>
+  </nav>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://thxiqhhpabenkqqnktrb.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoeGlxaGhwYWJlbmtxcW5rdHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNjY2NDAsImV4cCI6MjA2Njg0MjY0MH0.Z_GHmgzGBuRX4YWj2uRT4rR8WtpUA9lg-qZHwn2xNMw'
+    );
+
+    async function loadPosts() {
+      const timeline = document.getElementById('timeline');
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        alert("Can't fetch posts.");
+        console.error(error);
+        return;
+      }
+
+      timeline.innerHTML = "";
+
+      data.forEach(post => {
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `
+          <div class="post-user">@${post.username}</div>
+          <div class="post-content">${post.content}</div>
+          <div class="post-meta">
+            <span>${new Date(post.created_at).toLocaleString()}</span>
+          </div>
+        `;
+        timeline.appendChild(div);
+      });
+    }
+
+    async function updateActivity(user) {
+      const activityList = document.getElementById('activity-list');
+
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Activity error:", error);
+        return;
+      }
+
+      activityList.innerHTML = `
+        <li>${data.length} Posts</li>
+        <li>0 Comments</li>
+        <li>0 Likes</li>
+        <li>0 Space Hosted</li>
+      `;
+    }
+
+    async function init() {
+      const session = await supabase.auth.getSession();
+      const user = session.data.session?.user;
+
+      if (!user) {
+        window.location.href = '../login/login.html';
+        return;
+      }
+
+      document.getElementById('submitPost').addEventListener('click', async () => {
+        const postBox = document.getElementById('postContent');
+        const content = postBox.value.trim();
+        if (!content) return alert("Write something, bro.");
+
+        const { error } = await supabase.from("posts").insert([
+          {
+            content,
+            user_id: user.id,
+            username: user.email.split("@")[0],
+          },
+        ]);
+
+        if (error) {
+          alert("Failed to post!");
+          console.error(error);
+        } else {
+          postBox.value = "";
+          loadPosts();
+          updateActivity(user);
+        }
+      });
+
+      loadPosts();
+      updateActivity(user);
+    }
+
+    init();
+  </script>
+</body>
+</html>

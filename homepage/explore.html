@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Criqxa | Explore</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dark: #0b0b0b;
+      --glass: rgba(255, 255, 255, 0.03);
+      --blur: 20px;
+      --radius: 18px;
+      --white: #ffffff;
+      --accent: #d1d1d1;
+      --shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #0b0b0b;
+      color: #fff;
+      padding: 2rem;
+    }
+
+    .search-box {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .search-box input {
+      width: 100%;
+      max-width: 500px;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      border-radius: var(--radius);
+      border: none;
+      outline: none;
+      background: #1a1a1a;
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .result-post {
+      background: var(--glass);
+      padding: 1.4rem;
+      border-radius: var(--radius);
+      backdrop-filter: blur(var(--blur));
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease;
+    }
+
+    .result-post:hover {
+      transform: scale(1.01);
+    }
+
+    .result-username {
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-content {
+      font-size: 1rem;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search Criqxa posts...">
+  </div>
+
+  <div class="results" id="resultsContainer">
+    <!-- Matching posts will appear here -->
+  </div>
+
+  <script type="module">
+    // Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwx7ofPyYIwhkhyHcavgbYS67p5oQmCp4",
+      authDomain: "criqxa.firebaseapp.com",
+      projectId: "criqxa",
+      appId: "1:328720760982:web:dfd97bffe6dd9d27d982b7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const searchInput = document.getElementById("searchInput");
+    const resultsContainer = document.getElementById("resultsContainer");
+
+    // Protect route
+    onAuthStateChanged(auth, user => {
+      if (!user) window.location.href = "login.html";
+    });
+
+    searchInput.addEventListener("input", async () => {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      resultsContainer.innerHTML = "";
+
+      if (searchTerm.length < 2) return;
+
+      const q = query(collection(db, "posts"));
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.content.toLowerCase().includes(searchTerm)) {
+          const postEl = document.createElement("div");
+          postEl.className = "result-post";
+          postEl.innerHTML = `
+            <div class="result-username">@${data.username}</div>
+            <div class="result-content">${data.content}</div>
+          `;
+          resultsContainer.appendChild(postEl);
+        }
+      });
+
+      if (resultsContainer.innerHTML === "") {
+        resultsContainer.innerHTML = `<div style="color:#777;text-align:center;">No results found.</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
