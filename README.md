@@ -1,4 +1,4 @@
-⚡ What's Criqxa?
+ What's Criqxa?
 Criqxa is a lightning-fast cricket-first social platform made for fans, memes, and madness. Post your wild cricket thoughts, follow others, and scroll through real-time match reactions. Built for people who live cricket, not just watch it.
 
 Built With
@@ -10,24 +10,24 @@ Vanilla Modules — Split logic (like usersystem.js, follow.js, profile.js) for 
 
 GitHub Pages — For hosting and public access
 
-✨ Features
-🔐 Auth system — Login/signup securely via Supabase
+ Features
+Auth system — Login/signup securely via Supabase
 
 🗣️ Post system — Tweet-style posting
 
-🧡 Like & Follow — Interact with others in a real feed
+Like & Follow — Interact with others in a real feed
 
-📄 Profile page — View user info and past posts
+Profile page — View user info and past posts
 
-🧭 Explore tab — Discover new reactions & users
+Explore tab — Discover new reactions & users
 
-⚙️ Mobile-first design — Looks great everywhere
+ Mobile-first design — Looks great everywhere
 
-🚀 Live Site
-👉 Visit Criqxa Now
+ Live Site
+ Visit Criqxa Now
 (redirects to login automatically)
 
-📁 Folder Structure
+ Folder Structure
 bash
 Copy
 Edit
@@ -42,20 +42,16 @@ Edit
   └─ profile.html
 /assets
   └─ styles.css
-🔮 Upcoming (Next Update Goals)
-🧵 Comments and Replies
+ Upcoming (Next Update Goals)
+ Comments and Replies
 
-📸 Upload images with posts
+Upload images with postsVoice notes
 
-🎙️ Voice notes
+ Dark/light theme toggle
 
-🪄 Dark/light theme toggle
+Internationalization
 
-🌍 Internationalization
-
-🙌 Credits
-Built with ♥ by Atharv  — the one who blends code, cricket, and chaos.
+Credits
+Built with  by Atharv  — the one who blends code, cricket, and chaos.
 Logo, design, logic — everything from scratch. No bootstraps. No bloat.
 
-🧠 Pro Tip
-You can fork this repo, plug your own Supabase keys in /modules/usersystem.js, and instantly create your own social platform — cricket or otherwise.
